@@ -2,20 +2,41 @@ sudo: required
 dist: trusty
 language: cpp
 
-compiler:
-  - clang
-  - gcc
+env:
+  global:
+    - JOBS=4
+    - MAKEFLAGS="-j ${JOBS}"
+    - POLYBAR_BUILD_TYPE="compile"
+
+script: source ${TRAVIS_BUILD_DIR}/common/travis/build.sh
+
+matrix:
+  include:
+    - compiler: clang
+      env: BUILD_TYPE=Release
+
+    - compiler: clang
+      env: BUILD_TYPE=Debug
+
+    - compiler: gcc
+      env: BUILD_TYPE=Debug POLYBAR_BUILD_TYPE=tests BUILD_TESTS=ON
+      before_install:
+        - pip install --user cpp-coveralls
+      script: ${TRAVIS_BUILD_DIR}/common/travis/tests.sh
+      after_success:
+        - coveralls --root .. -E ".*CMakeFiles.*" -e tests -e lib -e build/googletest-src --gcov-options '\-p'
+
+    - compiler: gcc
+      env: BUILD_TYPE=Release
+
+    - compiler: gcc
+      env: BUILD_TYPE=Debug
 
 addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - llvm-toolchain-precise-3.8
-      - sourceline: "ppa:george-edison55/george-edison"
     packages:
-      - clang-3.8
-      - cmake
-      - cmake-data
       - g++-5
       - gcc-5
       - i3-wm
@@ -36,21 +57,10 @@ addons:
       - xcb-proto
       - xutils-dev
 
-env:
-  global:
-    - BUILD_TESTS="ON"
-    - LLVM_VERSION="3.8.1"
-    - LLVM_URL="http://llvm.org/releases/${LLVM_VERSION}/llvm-${LLVM_VERSION}.src.tar.xz"
-    - LIBCXX_URL="http://llvm.org/releases/${LLVM_VERSION}/libcxx-${LLVM_VERSION}.src.tar.xz"
-    - LIBCXXABI_URL="http://llvm.org/releases/${LLVM_VERSION}/libcxxabi-${LLVM_VERSION}.src.tar.xz"
-    - CMAKE_URL="https://cmake.org/files/v3.6/cmake-3.6.2-Linux-x86_64.tar.gz"
-    - PYTHONPATH="/usr/lib/python2.7/dist-packages:${PYTHONPATH}"
-    - JOBS=4
-
 cache:
+  ccache: true
+  apt: true
   directories:
-    - ${TRAVIS_BUILD_DIR}/deps/cmake
-    - ${TRAVIS_BUILD_DIR}/deps/llvm-3.8.1/install
     - ${TRAVIS_BUILD_DIR}/deps/xcb-util-xrm
 
 install:
@@ -58,16 +68,14 @@ install:
   - mkdir -p "${DEPS_DIR}" && cd "${DEPS_DIR}"
   - source ${TRAVIS_BUILD_DIR}/common/travis/environment.sh
   - source ${TRAVIS_BUILD_DIR}/common/travis/install_xcb_xrm.sh
-  - source ${TRAVIS_BUILD_DIR}/common/travis/install_cmake.sh
-  - source ${TRAVIS_BUILD_DIR}/common/travis/install_libcpp.sh
 
 before_script:
   - source ${TRAVIS_BUILD_DIR}/common/travis/summary.sh
   - source ${TRAVIS_BUILD_DIR}/common/travis/configure.sh
 
-script:
-  - source ${TRAVIS_BUILD_DIR}/common/travis/build.sh
-  - source ${TRAVIS_BUILD_DIR}/common/travis/tests.sh
+# Only fetch the newest 5 commits instead of 50
+git:
+  depth: 5
 
 notifications:
   email: false

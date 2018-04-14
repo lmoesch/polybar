@@ -1,6 +1,7 @@
 # Polybar
 
 [![Build Status](https://travis-ci.org/jaagr/polybar.svg?branch=master)](https://travis-ci.org/jaagr/polybar)
+[![Coverage Status](https://coveralls.io/repos/github/jaagr/polybar/badge.svg?branch=master)](https://coveralls.io/github/jaagr/polybar?branch=master)
 [![MIT License](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000?style=plastic)](https://github.com/jaagr/polybar/blob/master/LICENSE)
 
 A fast and easy-to-use tool for creating status bars.
@@ -71,11 +72,13 @@ If you are using **Void Linux**, you can install [polybar](https://github.com/vo
 
 If you are using **NixOS**, polybar is available in both the stable and unstable channels and can be installed with the command `nix-env -iA nixos.polybar`.
 
-If you are using **Debian**, polybar is available from the [GetDeb](http://www.getdeb.net/app/Polybar) repository.
+If you are using **Ubuntu**, polybar is available from the [GetDeb](http://www.getdeb.net/app/Polybar) repository.
 
 If you are using **Slackware**, polybar is available from the [SlackBuilds](https://slackbuilds.org/repository/14.2/desktop/polybar/) repository.
 
+If you are using **Source Mage GNU/Linux**, polybar spell is available in test grimoire and can be installed via `cast polybar`.
 
+If you are using **openSUSE**, polybar is available from [OBS](https://build.opensuse.org/package/show/home:sysek/polybar) repository. For now package is only for Tumbleweed.
 ### Dependencies
 
 A compiler with C++14 support ([clang-3.4+](http://llvm.org/releases/download.html), [gcc-5.1+](https://gcc.gnu.org/releases.html)).
@@ -91,7 +94,9 @@ A compiler with C++14 support ([clang-3.4+](http://llvm.org/releases/download.ht
 - xcb-util-cursor *required for the `cursor-click` and `cursor-scroll` settings*
 
 **Optional dependencies for extended module support:**
-- alsa-lib *required by `internal/volume`*
+- alsa-lib *required by `internal/alsa`*
+- libpulse *required by `internal/pulseaudio`*
+- i3-wm *required by `internal/i3`*
 - jsoncpp *required by `internal/i3`*
 - libmpdclient *required by `internal/mpd`*
 - libcurl *required by `internal/github`*

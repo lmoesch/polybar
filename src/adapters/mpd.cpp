@@ -10,6 +10,8 @@
 
 POLYBAR_NS
 
+#define TRACE_BOOL(mode) m_log.trace("mpdconnection.%s: %s", __func__, mode ? "true" : "false");
+
 namespace mpd {
   sig_atomic_t g_connection_closed = 0;
   void g_mpd_signal_handler(int signum) {
@@ -29,15 +31,26 @@ namespace mpd {
 
   void check_errors(mpd_connection* conn) {
     check_connection(conn);
+
+    string err_msg;
+
     switch (mpd_connection_get_error(conn)) {
       case MPD_ERROR_SUCCESS:
         return;
       case MPD_ERROR_SERVER:
-        mpd_connection_clear_error(conn);
-        throw server_error(mpd_connection_get_error_message(conn), mpd_connection_get_server_error(conn));
+        {
+          err_msg = mpd_connection_get_error_message(conn);
+          enum mpd_server_error server_err = mpd_connection_get_server_error(conn);
+          mpd_connection_clear_error(conn);
+          throw server_error(err_msg, server_err);
+        }
       default:
-        mpd_connection_clear_error(conn);
-        throw client_error(mpd_connection_get_error_message(conn), mpd_connection_get_error(conn));
+        {
+          err_msg = mpd_connection_get_error_message(conn);
+          enum mpd_error err = mpd_connection_get_error(conn);
+          mpd_connection_clear_error(conn);
+          throw client_error(err_msg, err);
+        }
     }
   }
 
@@ -233,6 +246,7 @@ namespace mpd {
 
   void mpdconnection::pause(bool state) {
     try {
+      TRACE_BOOL(state);
       check_prerequisites_commands_list();
       mpd_run_pause(m_connection.get(), state);
       check_errors(m_connection.get());
@@ -293,6 +307,7 @@ namespace mpd {
 
   void mpdconnection::set_repeat(bool mode) {
     try {
+      TRACE_BOOL(mode);
       check_prerequisites_commands_list();
       mpd_run_repeat(m_connection.get(), mode);
       check_errors(m_connection.get());
@@ -303,6 +318,7 @@ namespace mpd {
 
   void mpdconnection::set_random(bool mode) {
     try {
+      TRACE_BOOL(mode);
       check_prerequisites_commands_list();
       mpd_run_random(m_connection.get(), mode);
       check_errors(m_connection.get());
@@ -313,6 +329,7 @@ namespace mpd {
 
   void mpdconnection::set_single(bool mode) {
     try {
+      TRACE_BOOL(mode);
       check_prerequisites_commands_list();
       mpd_run_single(m_connection.get(), mode);
       check_errors(m_connection.get());
@@ -323,6 +340,7 @@ namespace mpd {
 
   void mpdconnection::set_consume(bool mode) {
     try {
+      TRACE_BOOL(mode);
       check_prerequisites_commands_list();
       mpd_run_consume(m_connection.get(), mode);
       check_errors(m_connection.get());
@@ -464,5 +482,7 @@ namespace mpd {
 
   // }}}
 }
+
+#undef TRACE_BOOL
 
 POLYBAR_NS_END

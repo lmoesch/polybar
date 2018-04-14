@@ -144,7 +144,7 @@ namespace modules {
         m_mpd->connect();
       }
     } catch (const mpd_exception& err) {
-      m_log.trace("%s: %s", name(), err.what());
+      m_log.err("%s: %s", name(), err.what());
       m_mpd.reset();
       return def;
     }
@@ -200,7 +200,7 @@ namespace modules {
       }
     }
 
-    if (m_status->match_state(mpdstate::PLAYING)) {
+    if (m_status && m_status->match_state(mpdstate::PLAYING)) {
       // Always update the status while playing
       m_status->update(-1, m_mpd.get());
     }
@@ -331,6 +331,8 @@ namespace modules {
     if (cmd.compare(0, 3, "mpd") != 0) {
       return false;
     }
+
+    m_log.info("%s: event: %s", name(), cmd);
 
     try {
       auto mpd = factory_util::unique<mpdconnection>(m_log, m_host, m_port, m_pass);

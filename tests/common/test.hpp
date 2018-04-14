@@ -10,6 +10,8 @@
 #include <cstdio>
 #include <cstdlib>
 
+#include "gtest/gtest.h"
+
 #define expect(...) \
   (void)((__VA_ARGS__) || (expect_fail__(#__VA_ARGS__, __FILE__, __LINE__), 0))
 #define static_expect(...) static_assert((__VA_ARGS__), "fail")

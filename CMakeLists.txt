@@ -26,8 +26,9 @@ add_subdirectory(lib)
 add_subdirectory(man)
 add_subdirectory(src bin)
 
+# We need to enable testing in the root folder so that 'ctest' and 'make test'
+# can be run in the build directory
 if(BUILD_TESTS)
-  add_subdirectory(tests)
-else()
+  enable_testing()
   add_subdirectory(tests EXCLUDE_FROM_ALL)
 endif()

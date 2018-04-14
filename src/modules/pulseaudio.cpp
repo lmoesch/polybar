@@ -17,8 +17,10 @@ namespace modules {
   pulseaudio_module::pulseaudio_module(const bar_settings& bar, string name_) : event_module<pulseaudio_module>(bar, move(name_)) {
     // Load configuration values
     auto sink_name = m_conf.get(name(), "sink", ""s);
+    bool m_max_volume = m_conf.get(name(), "use-ui-max", true);
+
     try {
-      m_pulseaudio = factory_util::unique<pulseaudio>(m_log, move(sink_name));
+      m_pulseaudio = factory_util::unique<pulseaudio>(m_log, move(sink_name), m_max_volume);
     } catch (const pulseaudio_error& err) {
       throw module_error(err.what());
     }
@@ -126,7 +128,7 @@ namespace modules {
   bool pulseaudio_module::input(string&& cmd) {
     if (!m_handle_events) {
       return false;
-    } else if (cmd.compare(0, 3, EVENT_PREFIX) != 0) {
+    } else if (cmd.compare(0, strlen(EVENT_PREFIX), EVENT_PREFIX) != 0) {
       return false;
     }
 

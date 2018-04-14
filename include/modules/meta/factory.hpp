@@ -32,7 +32,7 @@
 #include "modules/network.hpp"
 #endif
 #if ENABLE_ALSA
-#include "modules/volume.hpp"
+#include "modules/alsa.hpp"
 #endif
 #if ENABLE_PULSEAUDIO
 #include "modules/pulseaudio.hpp"
@@ -52,7 +52,7 @@ POLYBAR_NS
 using namespace modules;
 
 namespace {
-  module_interface* make_module(string&& name, const bar_settings& bar, string module_name) {
+  module_interface* make_module(string&& name, const bar_settings& bar, string module_name, const logger& m_log) {
     if (name == "internal/counter") {
       return new counter_module(bar, move(module_name));
     } else if (name == "internal/backlight") {
@@ -76,7 +76,10 @@ namespace {
     } else if (name == "internal/mpd") {
       return new mpd_module(bar, move(module_name));
     } else if (name == "internal/volume") {
-      return new volume_module(bar, move(module_name));
+      m_log.warn("internal/volume is deprecated, use internal/alsa instead");
+      return new alsa_module(bar, move(module_name));
+    } else if (name == "internal/alsa") {
+      return new alsa_module(bar, move(module_name));
     } else if (name == "internal/pulseaudio") {
       return new pulseaudio_module(bar, move(module_name));
     } else if (name == "internal/network") {

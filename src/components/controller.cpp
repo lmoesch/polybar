@@ -103,7 +103,7 @@ controller::controller(connection& conn, signal_emitter& emitter, const logger& 
           throw application_error("Inter-process messaging needs to be enabled");
         }
 
-        m_modules[align].emplace_back(make_module(move(type), m_bar->settings(), module_name));
+        m_modules[align].emplace_back(make_module(move(type), m_bar->settings(), module_name, m_log));
         created_modules++;
       } catch (const runtime_error& err) {
         m_log.err("Disabling module \"%s\" (reason: %s)", module_name, err.what());
@@ -275,7 +275,20 @@ void controller::read_events() {
     int events = select(maxfd + 1, &readfds, nullptr, nullptr, nullptr);
 
     // Check for errors
-    if (events == -1 || g_terminate || m_connection.connection_has_error()) {
+    if (events == -1)  {
+
+      /*
+       * The Interrupt errno is generated when polybar is stopped, so it
+       * shouldn't generate an error message
+       */
+      if (errno != EINTR) {
+        m_log.err("select failed in event loop: %s", strerror(errno));
+      }
+
+      break;
+    }
+
+    if (g_terminate || m_connection.connection_has_error()) {
       break;
     }
 
